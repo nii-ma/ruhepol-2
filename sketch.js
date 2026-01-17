@@ -19,7 +19,7 @@ function setup() {
   textAlign(CENTER, CENTER);
   textSize(48);
 
-  // Videos laden (NICHT in preload!)
+  // Videos laden (MP4 H264 + AAC!)
   for (let i = 1; i <= 4; i++) {
     themes["THEMA 1"].videos.push(createVideo(`media/thema1/v${i}.mp4`));
     themes["THEMA 2"].videos.push(createVideo(`media/thema2/v${i}.mp4`));
@@ -31,9 +31,9 @@ function setup() {
     for (let v of themes[t].videos) {
       v.hide();
       v.volume(1.0);
-      v.attribute("playsinline", ""); // WICHTIG für iPhone
+      v.attribute("playsinline", ""); // sehr wichtig für iOS
       v.position(0, 0);
-      v.style("object-fit", "cover");
+      v.style("object-fit", "cover");  // Vollbild
     }
   }
 }
@@ -43,14 +43,12 @@ function draw() {
     background(0);
     drawMenu();
   } else {
-    // Wenn Video läuft: Canvas transparent lassen
-    clear();
+    clear(); // Canvas transparent, Video sichtbar
   }
 }
 
 function drawMenu() {
   fill(255);
-
   for (let w of words) {
     let floatY = sin(frameCount * 0.02 + w.t) * 20;
     let px = w.x * width;
@@ -59,14 +57,11 @@ function drawMenu() {
   }
 }
 
+// TouchEvent für iOS
 function touchStarted() {
-  userStartAudio(); // wichtig für iOS
+  userStartAudio(); // iOS Audio freischalten
   handlePress();
   return false;
-}
-
-function mousePressed() {
-  handlePress();
 }
 
 function handlePress() {
@@ -75,7 +70,6 @@ function handlePress() {
   for (let w of words) {
     let px = w.x * width;
     let py = w.y * height;
-
     if (dist(mouseX, mouseY, px, py) < 150) {
       startTheme(w.text);
       break;
@@ -85,13 +79,11 @@ function handlePress() {
 
 function startTheme(themeName) {
   state = "play";
-
   let theme = themes[themeName];
   let v = random(theme.videos);
-
   currentVideo = v;
 
-  // Alle Videos stoppen & verstecken
+  // Alle Videos stoppen
   for (let t in themes) {
     for (let vid of themes[t].videos) {
       vid.stop();
@@ -99,11 +91,11 @@ function startTheme(themeName) {
     }
   }
 
+  // Video starten
   v.size(windowWidth, windowHeight);
   v.show();
   v.time(0);
   v.play();
-
   v.onended(videoFinished);
 }
 
@@ -117,8 +109,8 @@ function videoFinished() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-
   if (currentVideo) {
     currentVideo.size(windowWidth, windowHeight);
   }
 }
+
